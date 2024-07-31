@@ -202,3 +202,14 @@ export async function editQuestion(params: EditQuestionParams) {
     console.log(error);
   }
 }
+export async function getHotQuestions() {
+  try {
+    connectToDatabase();
+
+    const hotQuestions = await QuestionModel.find({}).sort({ views: -1, upvote: -1 }).limit(5);
+
+    return hotQuestions;
+  } catch (error) {
+    console.log(error);
+  }
+}
