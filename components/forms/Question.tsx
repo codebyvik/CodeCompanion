@@ -35,15 +35,15 @@ const Question = ({ type, mongoUserId, questionDetails }: Props) => {
   const router = useRouter();
   const pathname = usePathname();
 
-  const parsedQuestionDetails = JSON.parse(questionDetails || "");
+  const parsedQuestionDetails = questionDetails && JSON.parse(questionDetails || "");
 
-  const groupedTags = parsedQuestionDetails.tags.map((tag: any) => tag.name);
+  const groupedTags = parsedQuestionDetails?.tags.map((tag: any) => tag.name);
 
   const form = useForm<z.infer<typeof QuestionSchema>>({
     resolver: zodResolver(QuestionSchema),
     defaultValues: {
-      title: parsedQuestionDetails.title || "",
-      explanation: parsedQuestionDetails.content || "",
+      title: parsedQuestionDetails?.title || "",
+      explanation: parsedQuestionDetails?.content || "",
       tags: groupedTags || [],
     },
   });
@@ -150,7 +150,7 @@ const Question = ({ type, mongoUserId, questionDetails }: Props) => {
                     apiKey={process.env.NEXT_PUBLIC_TINY_EDITOR_API_KEY}
                     // @ts-ignore
                     onInit={(_evt, editor) => (editorRef.current = editor)}
-                    initialValue={parsedQuestionDetails.content || ""}
+                    initialValue={parsedQuestionDetails?.content || ""}
                     onBlur={field.onBlur}
                     onEditorChange={(content) => field.onChange(content)}
                     init={{

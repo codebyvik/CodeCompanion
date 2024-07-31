@@ -7,9 +7,12 @@ import HomeFilters from "@/components/home/HomeFilters";
 import NoResult from "@/components/shared/NoResult";
 import QuestionCard from "@/components/cards/QuestionCard";
 import { getAllQuestions } from "@/lib/actions/questions.action";
+import { SearchParamsProps } from "@/types";
 
-export default async function Home() {
-  const result = await getAllQuestions({});
+export default async function Home({ searchParams }: SearchParamsProps) {
+  const result = await getAllQuestions({
+    searchQuery: searchParams.q,
+  });
 
   return (
     <>
