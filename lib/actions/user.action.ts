@@ -36,7 +36,7 @@ export async function getAllUsers(params: GetAllUsersParams) {
     connectToDatabase();
     // TODO
     // const {page =1 , pageSize = 20 ,filter , searchQuery} = params;
-    const { searchQuery } = params;
+    const { searchQuery, filter } = params;
 
     const query: FilterQuery<typeof QuestionModel> = {};
 
@@ -47,7 +47,23 @@ export async function getAllUsers(params: GetAllUsersParams) {
       ];
     }
 
-    const users = await UserModel.find(query).sort({ createdAt: -1 });
+    let sortOptions = {};
+
+    switch (filter) {
+      case "new_users":
+        sortOptions = { joinedAt: -1 };
+        break;
+      case "old_users":
+        sortOptions = { joinedAt: 1 };
+        break;
+      case "top_contributers":
+        sortOptions = { reputation: -1 };
+        break;
+      default:
+        break;
+    }
+
+    const users = await UserModel.find(query).sort(sortOptions);
 
     return { users };
   } catch (error) {
@@ -142,17 +158,39 @@ export async function getSavedQuestions(params: GetSavedQuestionsParams) {
   try {
     connectToDatabase();
 
-    const { clerkId, searchQuery } = params;
+    const { clerkId, searchQuery, filter } = params;
 
     const query: FilterQuery<typeof QuestionModel> = searchQuery
       ? { title: { $regex: new RegExp(searchQuery, "i") } }
       : {};
 
+    let sortOptions = {};
+
+    switch (filter) {
+      case "most_recent":
+        sortOptions = { createdAt: -1 };
+        break;
+      case "oldest":
+        sortOptions = { createdAt: 1 };
+        break;
+      case "most_voted":
+        sortOptions = { upvotes: -1 };
+        break;
+      case "most_viewed":
+        sortOptions = { views: -1 };
+        break;
+      case "most_answered":
+        sortOptions = { answers: -1 };
+        break;
+      default:
+        break;
+    }
+
     const user = await UserModel.findOne({ clerkId }).populate({
       path: "saved",
       match: query,
       options: {
-        sort: { createdAt: -1 },
+        sort: sortOptions,
       },
       populate: [
         { path: "tags", model: TagModel, select: "_id name" },
