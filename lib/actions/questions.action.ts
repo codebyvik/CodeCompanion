@@ -109,10 +109,17 @@ export async function createQuestion(params: CreateQuestionParams) {
       },
     });
 
-    revalidatePath(path);
+    // create an interaction
+    await InteractionModel.create({
+      user: author,
+      action: "ask_question",
+      question: question._id,
+      tags: tagDocuments,
+    });
+    // Increment author's reputation by 5 points for creating question
+    await UserModel.findByIdAndUpdate(author, { $inc: { reputation: 5 } });
 
-    // ToDo create an interaction record for the users ask_question action
-    // ToDo Increment author's reputation by 5 points for creating question
+    revalidatePath(path);
   } catch (error) {
     console.log("error", error);
     throw error;
@@ -161,7 +168,13 @@ export async function upvoteQuestion(params: QuestionVoteParams) {
       throw new Error("Question not found");
     }
 
-    // Increment author's reputation
+    // Increment users's reputation +1 or -1 for upvoting/revoking
+    await UserModel.findByIdAndUpdate(userId, { $inc: { reputation: hasupVoted ? -2 : 2 } });
+
+    // Increment author's reputation +10 or -10 for receiving upvoting/revoking
+    await UserModel.findByIdAndUpdate(question.author, {
+      $inc: { reputation: hasupVoted ? -10 : 10 },
+    });
 
     revalidatePath(path);
   } catch (error) {
@@ -195,7 +208,13 @@ export async function downvoteQuestion(params: QuestionVoteParams) {
       throw new Error("Question not found");
     }
 
-    // Increment author's reputation
+    // Increment users's reputation +1 or -1 for upvoting/revoking
+    await UserModel.findByIdAndUpdate(userId, { $inc: { reputation: hasdownVoted ? -2 : 2 } });
+
+    // Increment author's reputation +10 or -10 for receiving upvoting/revoking
+    await UserModel.findByIdAndUpdate(question.author, {
+      $inc: { reputation: hasdownVoted ? -10 : 10 },
+    });
 
     revalidatePath(path);
   } catch (error) {

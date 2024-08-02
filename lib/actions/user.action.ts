@@ -259,7 +259,7 @@ export async function getUserQuestions(params: GetUserStatsParams) {
     const totalQuestions = await QuestionModel.countDocuments({ author: userId });
 
     const userQuestions = await QuestionModel.find({ author: userId })
-      .sort({ views: -1, upvotes: -1 })
+      .sort({ createdAt: -1, views: -1, upvotes: -1 })
       .skip(skipAmount)
       .limit(pageSize)
       .populate("tags", "_id name")
