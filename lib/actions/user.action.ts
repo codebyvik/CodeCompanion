@@ -16,6 +16,8 @@ import { revalidatePath } from "next/cache";
 import QuestionModel from "@/database/question.model";
 import TagModel from "@/database/tag.model";
 import AnswerModel from "@/database/answer.model";
+import { BadgeCriteriaType } from "@/types";
+import { assignBadges } from "../utils";
 
 export async function getUserByID(params: GetUserByIdParams) {
   try {
@@ -237,10 +239,62 @@ export async function getUserInfo(params: GetUserByIdParams) {
     const totalQuestions = await QuestionModel.countDocuments({ author: user._id });
     const totalAnswers = await AnswerModel.countDocuments({ author: user._id });
 
+    const [questionUpvotes] = await QuestionModel.aggregate([
+      { $match: { author: user._id } },
+      {
+        $project: {
+          _id: 0,
+          upvotes: { $size: "$upvotes" },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          totalUpvotes: { $sum: "$upvotes" },
+        },
+      },
+    ]);
+    const [answerUpvotes] = await AnswerModel.aggregate([
+      { $match: { author: user._id } },
+      {
+        $project: {
+          _id: 0,
+          upvotes: { $size: "$upvotes" },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          totalUpvotes: { $sum: "$upvotes" },
+        },
+      },
+    ]);
+    const [questionViews] = await QuestionModel.aggregate([
+      { $match: { author: user._id } },
+      {
+        $group: {
+          _id: null,
+          totalViews: { $sum: "$views" },
+        },
+      },
+    ]);
+
+    const criteria = [
+      { type: "QUESTION_COUNT" as BadgeCriteriaType, count: totalQuestions },
+      { type: "ANSWER_COUNT" as BadgeCriteriaType, count: totalAnswers },
+      { type: "QUESTION_UPVOTES" as BadgeCriteriaType, count: questionUpvotes?.totalUpvotes || 0 },
+      { type: "ANSWER_UPVOTES" as BadgeCriteriaType, count: answerUpvotes?.totalUpvotes || 0 },
+      { type: "TOTAL_VIEWS" as BadgeCriteriaType, count: questionViews?.totalViews || 0 },
+    ];
+
+    const badgeCounts = assignBadges({ criteria });
+
     return {
       user,
       totalQuestions,
       totalAnswers,
+      badgeCounts,
+      reputation: user.reputation,
     };
   } catch (error) {
     console.log(error);
@@ -259,7 +313,7 @@ export async function getUserQuestions(params: GetUserStatsParams) {
     const totalQuestions = await QuestionModel.countDocuments({ author: userId });
 
     const userQuestions = await QuestionModel.find({ author: userId })
-      .sort({ views: -1, upvotes: -1 })
+      .sort({ createdAt: -1, views: -1, upvotes: -1 })
       .skip(skipAmount)
       .limit(pageSize)
       .populate("tags", "_id name")

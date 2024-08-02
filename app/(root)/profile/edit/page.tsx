@@ -2,7 +2,13 @@ import Profile from "@/components/forms/Profile";
 import { getUserByID } from "@/lib/actions/user.action";
 import { ParamsProps } from "@/types";
 import { auth } from "@clerk/nextjs/server";
+import { Metadata } from "next";
 import React from "react";
+
+export const metadata: Metadata = {
+  title: "Edit Profile | Dev desk",
+  description: "Dev Desk is a community of 1,000,000+ developers. Join us .",
+};
 
 const Page = async ({ params }: ParamsProps) => {
   const { userId } = auth();

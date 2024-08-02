@@ -11,6 +11,7 @@ import {
 import QuestionModel from "@/database/question.model";
 import { revalidatePath } from "next/cache";
 import InteractionModel from "@/database/interaction.model";
+import UserModel from "@/database/user.model";
 
 export async function createAnswer(params: CreateAnswerParams) {
   try {
@@ -21,9 +22,21 @@ export async function createAnswer(params: CreateAnswerParams) {
     const newAnswer = await AnswerModel.create({ content, author, question });
 
     // add the answer to questions answer array
-    await QuestionModel.findByIdAndUpdate(question, { $push: { answers: newAnswer._id } });
+    const questionObject = await QuestionModel.findByIdAndUpdate(question, {
+      $push: { answers: newAnswer._id },
+    });
 
     // TODO add interaction to user reputation
+    // create an interaction
+    await InteractionModel.create({
+      user: author,
+      action: "answer",
+      question,
+      answer: newAnswer._id,
+      tags: questionObject.tags,
+    });
+    // Increment author's reputation by 10 points for answering
+    await UserModel.findByIdAndUpdate(author, { $inc: { reputation: 10 } });
 
     revalidatePath(path);
   } catch (error) {
@@ -101,7 +114,13 @@ export async function upvoteAnswer(params: AnswerVoteParams) {
       throw new Error("Answer not found");
     }
 
-    // Increment author's reputation
+    // Increment users's reputation +1 or -1 for upvoting/revoking
+    await UserModel.findByIdAndUpdate(userId, { $inc: { reputation: hasupVoted ? -2 : 2 } });
+
+    // Increment author's reputation +10 or -10 for receiving upvoting/revoking
+    await UserModel.findByIdAndUpdate(answer.author, {
+      $inc: { reputation: hasupVoted ? -10 : 10 },
+    });
 
     revalidatePath(path);
   } catch (error) {
@@ -135,7 +154,13 @@ export async function downvoteAnswer(params: AnswerVoteParams) {
       throw new Error("Answer not found");
     }
 
-    // Increment author's reputation
+    // Increment users's reputation +1 or -1 for upvoting/revoking
+    await UserModel.findByIdAndUpdate(userId, { $inc: { reputation: hasdownVoted ? -2 : 2 } });
+
+    // Increment author's reputation +10 or -10 for receiving upvoting/revoking
+    await UserModel.findByIdAndUpdate(answer.author, {
+      $inc: { reputation: hasdownVoted ? -10 : 10 },
+    });
 
     revalidatePath(path);
   } catch (error) {

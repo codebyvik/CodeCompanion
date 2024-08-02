@@ -12,10 +12,28 @@ import { auth } from "@clerk/nextjs/server";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
+import type { Metadata, ResolvingMetadata } from "next";
+
+type Props = {
+  params: { id: string };
+  searchParams: { [key: string]: string | string[] | undefined };
+};
+
+export async function generateMetadata(
+  { params, searchParams }: Props,
+  parent: ResolvingMetadata
+): Promise<Metadata> {
+  const result = await getUserInfo({ userId: params.id });
+  return {
+    title: `${result.user.name} - Dev Desk`,
+    description: "Dev Desk is a community of 1,000,000+ developers. Join us .",
+  };
+}
 
 const Page = async ({ params, searchParams }: URLProps) => {
   const { userId: clerkId } = auth();
   const userInfo = await getUserInfo({ userId: params.id });
+
   return (
     <>
       <div className="flex flex-col-reverse items-start justify-between sm:flex-row">
@@ -65,7 +83,12 @@ const Page = async ({ params, searchParams }: URLProps) => {
           </SignedIn>
         </div>
       </div>
-      <Stats totalQuestions={userInfo.totalQuestions} totalAnswers={userInfo.totalAnswers} />
+      <Stats
+        totalQuestions={userInfo.totalQuestions}
+        totalAnswers={userInfo.totalAnswers}
+        badges={userInfo.badgeCounts}
+        reputation={userInfo.reputation}
+      />
       <div className="mt-10 flex gap-10">
         <Tabs defaultValue="top-posts" className="flex-1">
           <TabsList className="background-light800_dark400 min-h-[42px] p-1">
@@ -76,7 +99,7 @@ const Page = async ({ params, searchParams }: URLProps) => {
               Answers
             </TabsTrigger>
           </TabsList>
-          <TabsContent value="top-posts">
+          <TabsContent className="mt-5 flex w-full flex-col gap-6" value="top-posts">
             <QuestionTab searchParams={searchParams} userId={userInfo.user._id} clerkId={clerkId} />
           </TabsContent>
           <TabsContent value="answers" className="flex w-full flex-col gap-6">
