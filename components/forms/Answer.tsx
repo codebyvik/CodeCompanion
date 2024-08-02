@@ -11,6 +11,7 @@ import { Button } from "../ui/button";
 import Image from "next/image";
 import { createAnswer } from "@/lib/actions/answer.action";
 import { usePathname } from "next/navigation";
+import { toast } from "../ui/use-toast";
 
 interface Props {
   question: string;
@@ -81,9 +82,15 @@ const Answer = ({ question, questionId, authorId }: Props) => {
         const editor = editorRef.current as any;
         editor.setContent(formattedAnswer);
       }
-      // toast..
+      return toast({
+        title: `Answer Generated`,
+      });
     } catch (error) {
       console.log(error);
+      return toast({
+        title: `Something went wrong! Try again later`,
+        variant: "destructive",
+      });
     } finally {
       setIsSubmittingAI(false);
     }

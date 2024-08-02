@@ -17,6 +17,7 @@ import { useForm } from "react-hook-form";
 import { ProfileSchema } from "@/lib/validations";
 import { Textarea } from "../ui/textarea";
 import { UpdateUser } from "@/lib/actions/user.action";
+import { toast } from "../ui/use-toast";
 
 interface Props {
   clerkId: string;
@@ -54,6 +55,10 @@ const Profile = ({ clerkId, user }: Props) => {
           bio: values.bio,
         },
         path: pathname,
+      });
+
+      toast({
+        title: `Profile updated successfully`,
       });
 
       router.back();
