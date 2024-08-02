@@ -9,6 +9,12 @@ import QuestionCard from "@/components/cards/QuestionCard";
 import { getAllQuestions } from "@/lib/actions/questions.action";
 import { SearchParamsProps } from "@/types";
 import Pagination from "@/components/shared/Pagination";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Home | Dev desk",
+  description: "Dev Desk is a community of 1,000,000+ developers. Join us .",
+};
 
 export default async function Home({ searchParams }: SearchParamsProps) {
   const result = await getAllQuestions({
