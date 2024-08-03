@@ -28,7 +28,9 @@ const NavContent = () => {
                 width={20}
                 height={20}
               />
-              <p className={`${isActive ? "base-bold" : "base-medium"}`}>{item.label}</p>
+              <p className={`${isActive ? "base-bold  text-light-900" : "base-medium"}`}>
+                {item.label}
+              </p>
             </Link>
           </SheetClose>
         );
