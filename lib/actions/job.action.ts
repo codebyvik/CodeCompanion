@@ -20,7 +20,6 @@ export async function fetchJobs(filters: any) {
   try {
     const { query, page } = filters;
 
-    // const url = `https://jsearch.p.rapidapi.com/search?query=${query}&page=${page}&date_posted=all`;
     const url = `https://jsearch.p.rapidapi.com/search?query=${query}&page=${page}`;
 
     const headers = {

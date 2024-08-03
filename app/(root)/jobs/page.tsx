@@ -1,11 +1,8 @@
 import Jobcard from "@/components/cards/Jobcard";
 import React from "react";
-
-import { Job } from "@/types";
 import { fetchCountries, fetchJobs, fetchLocation } from "@/lib/actions/job.action";
-import LocalSearchbar from "@/components/shared/search/LocalSearchbar";
-import Filter from "@/components/shared/filter/Filter";
 import JobsFilter from "@/components/shared/filter/JobsFilter";
+import Pagination from "@/components/shared/Pagination";
 
 interface Props {
   searchParams: {
@@ -27,21 +24,27 @@ const Page = async ({ searchParams }: Props) => {
   const page = parseInt(searchParams.page ?? 1);
 
   return (
-    <div>
+    <>
       <h1 className="h1-bold text-dark100_light900">Jobs</h1>
-      <div className="mt-11 flex justify-between gap-5 max-sm:flex-col sm:items-center ">
-        <LocalSearchbar
-          route="/jobs"
-          iconPosition="left"
-          imgSrc="/assets/icons/search.svg"
-          placeholder="Search for Jobs"
-          otherClasses="flex-1"
-        />
-        <JobsFilter countries={countries} otherClasses="min-h-[56px] sm:min-w-[170px]" />
+      <div className="flex">
+        <JobsFilter countries={countries} />
       </div>
-      {jobs.length > 0 && jobs.map((job: any) => <Jobcard key={job.job_id} job={job} />)}
-      pagination
-    </div>
+      <section className="light-border mb-9 mt-11 flex flex-col gap-9 border-b pb-9">
+        {jobs.length > 0 ? (
+          jobs.map((job: any) => {
+            if (job.job_title && job.job_title.toLowerCase() !== "undefined") {
+              return <Jobcard key={job.id} job={job} />;
+            }
+            return null;
+          })
+        ) : (
+          <div className="paragraph-regular text-dark200_light800 w-full text-center">
+            Oops! We couldn&apos;t find any jobs at the moment. Please try again later
+          </div>
+        )}
+      </section>
+      {jobs.length > 0 && <Pagination pageNumber={page} isNext={jobs.length === 10} />}
+    </>
   );
 };
 

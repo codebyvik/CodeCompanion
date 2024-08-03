@@ -1,3 +1,6 @@
+/* eslint-disable camelcase */
+import { processJobTitle } from "@/lib/utils";
+import { Job } from "@/types";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
@@ -19,56 +22,102 @@ const JobLocation = ({ city, country, state }: JobLocationProps) => {
         className="rounded-full"
       />
       <p className="body-medium text-dark400_light700">
-        {city && `${city}`} , {state && `${state}`} , {country && `${state}`}
+        {city && `${city} ,`} {state && `${state} ,`} {country && `${country}`}
       </p>
     </div>
   );
 };
 
-const company = {
-  image:
-    "https://devflow-rose.vercel.app/_next/image?url=https%3A%2F%2Fclarivate.com%2Fwp-content%2Fuploads%2F2020%2F11%2Flogo.png&w=3840&q=75",
-  title: " Online Tasker - QuickRewards - Patna - India - DoScouting",
-  short_desc:
-    "QuickRewards is seeking a detail-oriented and motivated Online Tasker to join our team. In this role, you will be responsible for completing various online tasks and surveys that help our clients gath",
-  type: "FULLTIME",
-  salary: "Not disclosed",
-  link: "https://careers.clarivate.com/job/JREQ128528/Senior-Software-Engineer-JAVA-Full-Stack?utm_campaign=google_jobs_apply&utm_source=google_jobs_apply&utm_medium=organic",
-  location: {
-    city: "Bengaluru",
-    state: "KA",
-    country: "IN",
-  },
-};
+const Jobcard = async ({ job }: { job: Job }) => {
+  const {
+    employer_logo,
+    employer_website,
+    job_employment_type,
+    job_title,
+    job_description,
+    job_apply_link,
+    job_city,
+    job_state,
+    job_country,
+    job_min_salary,
+    job_max_salary,
+  } = job;
 
-const Jobcard = async (job: any) => {
   return (
-    <section className="mt-8 rounded-md border bg-light-900 px-5 py-3">
-      <div className="flex gap-2">
-        <Image
-          src={job.job?.employer_logo || company.image}
-          width={100}
-          height={100}
-          alt="Company_logo"
-          className="border object-contain p-2"
-        />
-        <div>
-          <div>
-            <p>{job.job.job_title}</p>
-            <JobLocation
-              city={job.job.job_city}
-              country={job.job.job_country}
-              state={job.job.job_state}
+    <section className="background-light900_dark200 light-border shadow-light100_darknone flex flex-col items-start gap-6 rounded-lg border p-6 sm:flex-row sm:p-8">
+      <div className="flex w-full justify-end sm:hidden">
+        <JobLocation city={job_city} country={job_country} state={job_state} />
+      </div>
+      <div className="flex items-center gap-6">
+        {employer_logo ? (
+          <Link
+            href={employer_website ?? "/jobs"}
+            className="background-light800_dark400 relative size-16 rounded-xl"
+          >
+            <Image
+              src={employer_logo}
+              fill
+              alt="Company_logo"
+              className="size-full object-contain p-2"
             />
+          </Link>
+        ) : (
+          <Image
+            src="/assets/images/site-logo.svg"
+            alt="default site logo"
+            width={64}
+            height={64}
+            className="rounded-[10px]"
+          />
+        )}
+      </div>
+
+      <div className="w-full">
+        <div className="flex-between flex-wrap gap-2">
+          <p className="base-semibold text-dark200_light900">{processJobTitle(job_title)}</p>
+          <div className="hidden sm:flex">
+            <JobLocation city={job_city} country={job_country} state={job_state} />
+          </div>
+        </div>
+
+        <p className="body-regular text-dark500_light700  mt-2 line-clamp-2">{job_description}</p>
+
+        <div className="flex-between mt-8 flex-wrap gap-6">
+          <div className="flex flex-wrap items-center gap-6">
+            <div className="flex items-center gap-2">
+              <Image src="/assets/icons/clock-2.svg" alt="clock" width={20} height={20} />
+              <p className="body-medium text-light-500">{job_employment_type}</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <Image
+                src="/assets/icons/currency-dollar-circle.svg"
+                alt="dollar symbol"
+                width={20}
+                height={20}
+              />
+
+              <p className="body-medium text-light-500">
+                {job_min_salary && job_max_salary
+                  ? `${job_min_salary} - ${job_max_salary}`
+                  : "Not disclosed"}
+              </p>
+            </div>
           </div>
 
-          <p>{job.job.job_description}</p>
+          <Link
+            href={job_apply_link ?? "/jobs"}
+            target="_blank"
+            className="flex items-center gap-2"
+          >
+            <p className="body-semibold primary-text-gradient">View job</p>
 
-          <div>
-            <p>{job.job.job_employment_type}</p>
-            <p>{job.job.job_min_salary || "NOT Disclosed"}</p>
-            <Link href={job.job.job_apply_link}>View Job</Link>
-          </div>
+            <Image
+              src="/assets/icons/arrow-up-right.svg"
+              alt="arrow up right"
+              width={20}
+              height={20}
+            />
+          </Link>
         </div>
       </div>
     </section>

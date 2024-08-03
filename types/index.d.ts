@@ -14,10 +14,12 @@ export interface Job {
   job_employment_type?: string;
   job_title?: string;
   job_description?: string;
-  job_apply_link?: string;
+  job_apply_link?: any;
   job_city?: string;
   job_state?: string;
   job_country?: string;
+  job_min_salary?: number | string;
+  job_max_salary?: number | string;
 }
 
 export interface Country {
